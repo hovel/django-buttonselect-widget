@@ -37,12 +37,11 @@ class ButtonSelect(Select):
             evt.preventDefault();
             var btn = this;
             var btnContainer = btn.parentNode;
-            var input = btnContainer.parentNode.querySelector('input');
+            btnContainer.querySelector('input[type="hidden"]').value = btn.value;
             [].forEach.call(btnContainer.querySelectorAll('.btn'), function (elem) {
                 elem.className = elem.className.replace(/active/, '');
             });
             btn.className += 'active';
-            input.value = btn.value;
         }
         [].forEach.call(document.querySelectorAll('.button-select-widget .btn'), function (elem) {
             if (!elem._hasButtonSelectEvent) {
@@ -54,8 +53,8 @@ class ButtonSelect(Select):
         '''
 
         output = [
-            format_html('<input{0} type="hidden">', flatatt(input_attrs)),
             format_html('<div{0}>', flatatt(final_attrs)),
+            format_html('<input{0} type="hidden">', flatatt(input_attrs)),
             options,
             '</div>',
             js,
