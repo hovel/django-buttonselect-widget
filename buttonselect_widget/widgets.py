@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from itertools import chain
 
 from django.db.models.fields import BLANK_CHOICE_DASH
-from django.forms.util import flatatt
+from django.forms.utils import flatatt
 from django.forms.widgets import Select
 from django.utils.html import format_html
 from django.utils.encoding import force_text
