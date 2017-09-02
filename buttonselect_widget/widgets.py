@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from itertools import chain
 
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.forms.utils import flatatt
@@ -11,7 +10,7 @@ from django.utils.safestring import mark_safe
 
 
 class ButtonSelect(Select):
-    def render(self, name, value, attrs=None, choices=()):
+    def render(self, name, value, attrs=None, renderer=None):
         if self.allow_multiple_selected:
             error_msg = '{0}.render() does not support multi-selection.'
             raise NotImplementedError(error_msg.format(self.__class__.__name__))
@@ -19,7 +18,7 @@ class ButtonSelect(Select):
         if value is None:
             value = ''
 
-        final_attrs = self.build_attrs(attrs, name=name)
+        final_attrs = self.build_attrs(base_attrs=attrs, extra_attrs={'name': name})
         final_attrs['class'] = final_attrs.get('class', '').replace('form-control', '')
         final_attrs['class'] += ' btn-group button-select-widget'
 
@@ -29,7 +28,7 @@ class ButtonSelect(Select):
             'value': value,
         }
 
-        options = self.render_options(choices, [value])
+        options = self.render_options([value])
 
         js = '''
         <script>
@@ -63,22 +62,22 @@ class ButtonSelect(Select):
         return mark_safe('\n'.join(output))
 
     def render_option(self, selected_choices, option_value, option_label):
+        if option_value is None:
+            option_value = ''
         option_value = force_text(option_value)
-
         if option_value in selected_choices:
-            active_class = 'active'
+            active_class = mark_safe('active')
             if not self.allow_multiple_selected:
                 # Only allow for a single selection.
                 selected_choices.remove(option_value)
         else:
             active_class = ''
-
         return format_html(
             '<button value="{0}" class="btn btn-default {1}">{2}</button>',
             option_value, active_class, force_text(option_label)
         )
 
-    def render_options(self, choices, selected_choices):
+    def render_options(self, selected_choices):
         # Normalize to strings.
         selected_choices = set(force_text(v) for v in selected_choices)
 
@@ -87,7 +86,7 @@ class ButtonSelect(Select):
         # active. Dummy button is used to prevent this.
         output = ['<button style="display: none"></button>']
 
-        for option_value, option_label in chain(self.choices, choices):
+        for option_value, option_label in self.choices:
             if [(option_value, option_label)] == BLANK_CHOICE_DASH:
                 continue
             output.append(self.render_option(selected_choices, option_value, option_label))
